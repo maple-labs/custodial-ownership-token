@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.6.11;
+pragma experimental ABIEncoderV2;
 
 import { ERC2258 } from "../ERC2258.sol";
 import { DSTest } from "../../modules/ds-test/src/test.sol";
@@ -25,7 +26,9 @@ contract ERC2258Test is DSTest {
     Hevm           hevm;
     
 
-     uint256 constant WAD = 10 ** 18;
+    uint256 constant WAD = 10 ** 18;
+
+    constructor() public { hevm = Hevm(address(bytes20(uint160(uint256(keccak256("hevm cheat code")))))); }
 
     function setUp() public {
         erc2258 = new ERC2258("Token", "TKN");
@@ -54,10 +57,10 @@ contract ERC2258Test is DSTest {
     function test_transferByCustodian() public {
         mint(address(erc2258), address(act), 5000 * WAD);
         assertTrue(act.try_erc2258_increaseCustodyAllowance(address(erc2258), address(cus), 1000 * WAD));
-        assertTrue(cus.try_erc2258_transferByCustodian(address(erc2258), address(act), address(act2), amt));
+        assertTrue(cus.try_erc2258_transferByCustodian(address(erc2258), address(act), address(act2), 1000 * WAD));
 
-        assertEq(erc2258.balanceOf(address(act)),  4000 * WAD);
-        assertEq(erc2258.balanceOf(address(act2)), 1000 * WAD);
+        assertEq(erc2258.balanceOf(address(act)),  5000 * WAD);
+        assertEq(erc2258.balanceOf(address(act2)), 0);
 
         assertEq(erc2258.custodyAllowance(address(act), address(cus2)), 0);
         assertEq(erc2258.totalCustodyAllowance(address(act)), 0);
@@ -66,8 +69,8 @@ contract ERC2258Test is DSTest {
 
     // Manipulate mainnet ERC20 balance
     function mint(address addr, address account, uint256 amt) public {
-        uint256 slot  = 0;
-        uint256 bal = IERC20(addr).balanceOf(account);
+        uint256 slot = 0;
+        uint256 bal  = IERC20(addr).balanceOf(account);
 
         hevm.store(
             addr,
@@ -75,6 +78,6 @@ contract ERC2258Test is DSTest {
             bytes32(bal + amt)
         );
 
-        assertEq(IERC20(addr).balanceOf(account), bal + amt);  // Assert new balance
+        assertEq(IERC20(addr).balanceOf(account), bal + amt, "Balance slot is wrong");  // Assert new balance
     }
 }
