@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.6.11;
-pragma experimental ABIEncoderV2;
 
 import { IERC20 } from "../../modules/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { DSTest } from "../../modules/ds-test/src/test.sol";
