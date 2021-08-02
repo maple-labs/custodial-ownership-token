@@ -34,11 +34,22 @@ contract ERC2258 is IERC2258, ERC20 {
         uint256 newAllowance = oldAllowance.sub(amount);
 
         custodyAllowance[from][msg.sender] = newAllowance;
-        uint256 newTotalAllowance          = totalCustodyAllowance[from].sub(amount);
-        totalCustodyAllowance[from]        = newTotalAllowance;
-        
-        emit CustodyTransfer(msg.sender, from, to, amount);
+
         emit CustodyAllowanceChanged(from, msg.sender, oldAllowance, newAllowance);
+
+        if (from == to) {
+            uint256 newTotalAllowance   = totalCustodyAllowance[from].sub(amount);
+            totalCustodyAllowance[from] = newTotalAllowance;
+        } else {
+            oldAllowance = custodyAllowance[from][to];
+            newAllowance = oldAllowance.add(amount);
+
+            custodyAllowance[from][to] = newAllowance;
+
+            emit CustodyAllowanceChanged(from, to, oldAllowance, newAllowance);
+        }
+
+        emit CustodyTransfer(msg.sender, from, to, amount);
     }
 
 }

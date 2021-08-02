@@ -50,9 +50,8 @@ contract ERC2258Test is DSTest {
         assertEq(token.totalCustodyAllowance(address(account)),                 100);
         assertEq(token.balanceOf(address(account)),                             500);
 
-        // Increase the custody allowance to another custodian
         assertTrue(!account.try_erc2258_increaseCustodyAllowance(address(token), address(custodian2), 401));  // Account doesn't have enough balance
-        assertTrue( account.try_erc2258_increaseCustodyAllowance(address(token), address(custodian2), 400));
+        assertTrue( account.try_erc2258_increaseCustodyAllowance(address(token), address(custodian2), 400));  // Increase the custody allowance to another custodian
 
         assertEq(token.custodyAllowance(address(account), address(custodian1)), 100);
         assertEq(token.custodyAllowance(address(account), address(custodian2)), 400);
@@ -71,11 +70,18 @@ contract ERC2258Test is DSTest {
         assertEq(token.balanceOf(address(account)),                             500);
 
         assertTrue(!custodian1.try_erc2258_transferByCustodian(address(token), address(account), address(custodian2), 101));
-        assertTrue( custodian1.try_erc2258_transferByCustodian(address(token), address(account), address(custodian2), 100));
+        assertTrue( custodian1.try_erc2258_transferByCustodian(address(token), address(account), address(custodian2), 100));  // Transfer to custodian2
 
         assertEq(token.custodyAllowance(address(account), address(custodian1)), 0);
         assertEq(token.custodyAllowance(address(account), address(custodian2)), 100);
         assertEq(token.totalCustodyAllowance(address(account)),                 100);
+        assertEq(token.balanceOf(address(account)),                             500);
+
+        custodian2.erc2258_transferByCustodian(address(token), address(account), address(account), 100);  // Transfer back to account
+
+        assertEq(token.custodyAllowance(address(account), address(custodian1)), 0);
+        assertEq(token.custodyAllowance(address(account), address(custodian2)), 0);
+        assertEq(token.totalCustodyAllowance(address(account)),                 0);
         assertEq(token.balanceOf(address(account)),                             500);
     }
 
