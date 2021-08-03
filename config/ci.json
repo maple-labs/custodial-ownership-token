@@ -1,9 +1,6 @@
 {
   "language": "Solidity",
   "sources": {
-    "contracts/interfaces/IERC2258.sol": {
-      "urls": ["contracts/interfaces/IERC2258.sol"]
-    },
     "contracts/ERC2258.sol": {
       "urls": ["contracts/ERC2258.sol"]
     },
