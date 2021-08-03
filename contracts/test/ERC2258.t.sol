@@ -24,17 +24,16 @@ contract ERC2258Test is DSTest {
 
     MintableERC2258 token;
     ERC2258Account  account;
-    Custodian       custodian1;
-    Custodian       custodian2;
 
     function setUp() public {
-        token      = new MintableERC2258("Token", "TKN");
-        account    = new ERC2258Account();
-        custodian1 = new Custodian();
-        custodian2 = new Custodian();
+        token   = new MintableERC2258("Token", "TKN");
+        account = new ERC2258Account();
     }
 
     function test_increaseCustodyAllowance() public {
+        Custodian custodian1 = new Custodian();
+        Custodian custodian2 = new Custodian();
+        
         assertTrue(!account.try_erc2258_increaseCustodyAllowance(address(token), address(custodian1), 1));  // Account doesn't have any balance
 
         token.mint(address(account), 500);
@@ -60,29 +59,22 @@ contract ERC2258Test is DSTest {
     }
 
     function test_transferByCustodian() public {
+        Custodian custodian = new Custodian();
+
         token.mint(address(account), 500);
 
-        account.erc2258_increaseCustodyAllowance(address(token), address(custodian1), 100);
+        account.erc2258_increaseCustodyAllowance(address(token), address(custodian), 100);
 
-        assertEq(token.custodyAllowance(address(account), address(custodian1)), 100);
-        assertEq(token.custodyAllowance(address(account), address(custodian2)), 0);
-        assertEq(token.totalCustodyAllowance(address(account)),                 100);
-        assertEq(token.balanceOf(address(account)),                             500);
+        assertEq(token.custodyAllowance(address(account), address(custodian)), 100);
+        assertEq(token.totalCustodyAllowance(address(account)),                100);
+        assertEq(token.balanceOf(address(account)),                            500);
 
-        assertTrue(!custodian1.try_erc2258_transferByCustodian(address(token), address(account), address(custodian2), 101));
-        assertTrue( custodian1.try_erc2258_transferByCustodian(address(token), address(account), address(custodian2), 100));  // Transfer to custodian2
+        assertTrue(!custodian.try_erc2258_transferByCustodian(address(token), address(account), address(account), 101));
+        assertTrue( custodian.try_erc2258_transferByCustodian(address(token), address(account), address(account), 100));  // Transfer back to account
 
-        assertEq(token.custodyAllowance(address(account), address(custodian1)), 0);
-        assertEq(token.custodyAllowance(address(account), address(custodian2)), 100);
-        assertEq(token.totalCustodyAllowance(address(account)),                 100);
-        assertEq(token.balanceOf(address(account)),                             500);
-
-        custodian2.erc2258_transferByCustodian(address(token), address(account), address(account), 100);  // Transfer back to account
-
-        assertEq(token.custodyAllowance(address(account), address(custodian1)), 0);
-        assertEq(token.custodyAllowance(address(account), address(custodian2)), 0);
-        assertEq(token.totalCustodyAllowance(address(account)),                 0);
-        assertEq(token.balanceOf(address(account)),                             500);
+        assertEq(token.custodyAllowance(address(account), address(custodian)), 0);
+        assertEq(token.totalCustodyAllowance(address(account)),                0);
+        assertEq(token.balanceOf(address(account)),                            500);
     }
 
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.6.11;
 
-import { SafeMath } from "../../modules/openzeppelin-contracts/contracts/math/SafeMath.sol";
-import { ERC20 }    from "../../modules/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import { SafeMath } from "../modules/openzeppelin-contracts/contracts/math/SafeMath.sol";
+import { ERC20 }    from "../modules/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 import { IERC2258 } from "./interfaces/IERC2258.sol";
 
@@ -34,21 +34,11 @@ contract ERC2258 is IERC2258, ERC20 {
         uint256 newAllowance = oldAllowance.sub(amount);
 
         custodyAllowance[from][msg.sender] = newAllowance;
-
-        emit CustodyAllowanceChanged(from, msg.sender, oldAllowance, newAllowance);
-
-        if (from == to) {
-            totalCustodyAllowance[from] = totalCustodyAllowance[from].sub(amount);
-        } else {
-            oldAllowance = custodyAllowance[from][to];
-            newAllowance = oldAllowance.add(amount);
-
-            custodyAllowance[from][to] = newAllowance;
-
-            emit CustodyAllowanceChanged(from, to, oldAllowance, newAllowance);
-        }
-
+        uint256 newTotalAllowance          = totalCustodyAllowance[from].sub(amount);
+        totalCustodyAllowance[from]        = newTotalAllowance;
+        
         emit CustodyTransfer(msg.sender, from, to, amount);
+        emit CustodyAllowanceChanged(from, msg.sender, oldAllowance, newAllowance);
     }
 
 }
