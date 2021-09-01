@@ -6,8 +6,8 @@ import { DSTest } from "../../modules/ds-test/src/test.sol";
 
 import { ERC2258 } from "../ERC2258.sol";
 
-import { Custodian }      from "./accounts/Custodian.sol";
-import { ERC2258Account } from "./accounts/ERC2258Account.sol";
+import { ERC2258Custodian } from "./accounts/ERC2258Custodian.sol";
+import { ERC2258User }      from "./accounts/ERC2258User.sol";
 
 contract MintableERC2258 is ERC2258 {
 
@@ -19,20 +19,19 @@ contract MintableERC2258 is ERC2258 {
 
 }
 
-
 contract ERC2258Test is DSTest {
 
+    ERC2258User     account;
     MintableERC2258 token;
-    ERC2258Account  account;
 
     function setUp() public {
+        account = new ERC2258User();
         token   = new MintableERC2258("Token", "TKN");
-        account = new ERC2258Account();
     }
 
     function test_increaseCustodyAllowance() public {
-        Custodian custodian1 = new Custodian();
-        Custodian custodian2 = new Custodian();
+        ERC2258Custodian custodian1 = new ERC2258Custodian();
+        ERC2258Custodian custodian2 = new ERC2258Custodian();
         
         assertTrue(!account.try_erc2258_increaseCustodyAllowance(address(token), address(custodian1), 1));  // Account doesn't have any balance
 
@@ -59,7 +58,7 @@ contract ERC2258Test is DSTest {
     }
 
     function test_transferByCustodian() public {
-        Custodian custodian = new Custodian();
+        ERC2258Custodian custodian = new ERC2258Custodian();
 
         token.mint(address(account), 500);
 
